@@ -1,2 +1,2 @@
 # Shipwrecked_Project
-This is us trying to make soethign go viral.
+This is app is inspired by Wordle, but is not affiliated with or endorsed by "The New York Times".
