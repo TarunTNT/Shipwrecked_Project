@@ -1,1 +1,4 @@
-print("hello world")
+print("skibidi")
+print("urmom")
+print("hello")
+print("world")
