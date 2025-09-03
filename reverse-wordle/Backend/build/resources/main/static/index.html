@@ -1,0 +1,50 @@
+<!-- src/main/resources/static/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reverse Wordle</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Reverse Wordle</h1>
+  <p id="instructions">
+    You see a fully solved Wordle (6 guesses) but only colors remain.<br>
+    Click any tile to guess its hidden letter, then press Enter.<br>
+    You get three tries per tile (five in Forgiving mode).<br>
+    After your first miss, a grey number shows how many tries remain.<br>
+    Use the helper tools on the right to deduce each letter.
+    Please note that the Phantom Scan tells you what letters are in the puzzle, NOT what letters are in the solved word.
+  </p>
+
+  <div id="game">
+    <div id="board"></div>
+
+    <div id="sidebar">
+      <div id="modeToggle">
+        <label><input type="radio" name="mode" value="standard" checked> Standard (3 tries/tile)</label><br>
+        <label><input type="radio" name="mode" value="forgiving"> Forgiving (5 tries + 1 undo)</label>
+      </div>
+
+      <div id="tools">
+        <h3>Letter Counter</h3>
+        <input id="f1" maxlength="1" placeholder="A"> appears <span id="o1">–</span> times
+
+        <h3>One-Time Clue</h3>
+        <button id="revealClue">Reveal a Clue</button>
+
+        <h3>Scratch Box</h3>
+        <input id="scratchIn" maxlength="5" placeholder="scratch guess">
+        <button id="scratchBtn">Go</button>
+        <div id="scratchRows"></div>
+
+        <h3>Phantom Scan</h3>
+        <button id="phantomScanBtn">Phantom Scan</button>
+        <div id="phantomGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
