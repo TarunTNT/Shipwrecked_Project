@@ -19,6 +19,7 @@ public class WordleService {
     private List<String> commonWords;
     private String solution;
     private List<Guess> puzzleGuesses;
+    private boolean[][] revealed; // [row][col] tracks correctly-identified cells
     private boolean clueUsed = false;
 
     private final Random rnd = new Random();
@@ -28,7 +29,6 @@ public class WordleService {
         allWords    = load("/allwords.txt");
         commonWords = load("/words.txt");
     }
-
     private List<String> load(String resource) throws Exception {
         try (var in     = getClass().getResourceAsStream(resource);
              var reader = new BufferedReader(new InputStreamReader(in))) {
@@ -40,10 +40,12 @@ public class WordleService {
     }
 
     /** Starts or restarts a new puzzle */
+    /** Starts or restarts a new puzzle */
     public void newGame() {
         solution      = allWords.get(rnd.nextInt(allWords.size()));
         puzzleGuesses = simulateGuesses();
         clueUsed      = false;
+        revealed      = new boolean[6][5];
     }
 
     /**
@@ -101,13 +103,41 @@ public class WordleService {
         }
         return total;
     }
+    /** Row indices eligible for a clue: not the last row, not already fully solved */
+    public List<Integer> eligibleClueRows() {
+        if (puzzleGuesses == null) newGame();
+        List<Integer> out = new ArrayList<>();
+        for (int r = 0; r < puzzleGuesses.size() - 1; r++) {
+            if (!isRowFullySolved(r)) out.add(r);
+        }
+        return out;
+    }
 
+
+
+    // ⚠️ DEV/TEST ONLY — remove before shipping to real players.
+    public String debugSolution() {
+        if (puzzleGuesses == null) newGame();
+        return solution;
+    }
     /** One-time clue reveal of a full row */
+    /** One-time clue reveal of a full row. Row must not be the final (solution) row
+     *  and must not already be fully revealed by the player. */
     public Guess revealClue(int idx) {
         if (clueUsed) return null;
-        clueUsed = true;
         if (idx < 0 || idx >= puzzleGuesses.size()) return null;
+        if (idx == puzzleGuesses.size() - 1) return null; // never the last row
+        if (isRowFullySolved(idx)) return null;            // never an already-solved row
+
+        clueUsed = true;
         return puzzleGuesses.get(idx);
+    }
+
+    private boolean isRowFullySolved(int row) {
+        for (int c = 0; c < 5; c++) {
+            if (!revealed[row][c]) return false;
+        }
+        return true;
     }
 
     /** Scratch-box evaluation */
@@ -118,25 +148,53 @@ public class WordleService {
     }
 
     /** Validate a single letter at (row,col) */
+    /** Validate a single letter at (row,col). Marks the cell revealed on success. */
     public boolean validateLetter(int row, int col, char letter) {
         if (puzzleGuesses == null) newGame();
         String target = puzzleGuesses.get(row).word;
-        return Character.toLowerCase(letter) == target.charAt(col);
+        boolean correct = Character.toLowerCase(letter) == target.charAt(col);
+        if (correct) {
+            revealed[row][col] = true;
+        }
+        return correct;
     }
 
     /** Phantom-Scan: which letters A–Z appear in any guess */
-    public Map<String, Boolean> phantomScan() {
+    /** True once every blue/orange tile on the board has been correctly revealed */
+    public boolean isPhaseTwo() {
         if (puzzleGuesses == null) newGame();
-        Map<String, Boolean> map = new TreeMap<>();
-        for (char c = 'A'; c <= 'Z'; c++) {
-            map.put(String.valueOf(c), false);
-        }
-        for (Guess g : puzzleGuesses) {
-            for (char ch : g.word.toUpperCase().toCharArray()) {
-                map.put(String.valueOf(ch), true);
+        List<List<String>> colors = getBoardColors();
+        for (int r = 0; r < colors.size(); r++) {
+            for (int c = 0; c < colors.get(r).size(); c++) {
+                String color = colors.get(r).get(c);
+                if ((color.equals("blue") || color.equals("orange")) && !revealed[r][c]) {
+                    return false;
+                }
             }
         }
-        return map;
+        return true;
+    }
+
+    /**
+     * New Phantom Scan (Phase 2): remaining occurrence counts of each letter
+     * still hidden in unrevealed white/gray tiles. Letters with zero remaining
+     * occurrences are omitted.
+     */
+    public Map<String, Integer> phantomRemaining() {
+        if (puzzleGuesses == null) newGame();
+        Map<String, Integer> counts = new TreeMap<>();
+        List<List<String>> colors = getBoardColors();
+        for (int r = 0; r < puzzleGuesses.size(); r++) {
+            String word = puzzleGuesses.get(r).word;
+            for (int c = 0; c < word.length(); c++) {
+                String color = colors.get(r).get(c);
+                if (color.equals("white") && !revealed[r][c]) {
+                    String letter = String.valueOf(Character.toUpperCase(word.charAt(c)));
+                    counts.merge(letter, 1, Integer::sum);
+                }
+            }
+        }
+        return counts;
     }
 
     /** Core evaluator identical to Wordle rules */

@@ -22,7 +22,7 @@ public class GameController {
     }
 
     /** Get the 6×5 color grid (no letters) */
-    @GetMapping("/board")
+    @GetMapping("/board"   )
     public List<List<String>> board() {
         return svc.getBoardColors();
     }
@@ -61,7 +61,13 @@ public class GameController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
+    // ⚠️ DEV/TEST ONLY — remove this endpoint before shipping.
+    @GetMapping("/dev/solution")
+    public Map<String, String> devSolution() {
+        return Map.of("solution", svc.debugSolution());
+    }
+    /** Validate a single letter at (row, col) */
+    @PostMapping("/validate-letter")
     /** Validate a single letter at (row, col) */
     @PostMapping("/validate-letter")
     public Map<String, Object> validateLetter(@RequestBody Map<String, Object> body) {
@@ -69,12 +75,21 @@ public class GameController {
         int col = (int) body.get("col");
         String letter = ((String) body.get("letter")).toLowerCase();
         boolean correct = svc.validateLetter(row, col, letter.charAt(0));
-        return Map.of("correct", correct);
+        return Map.of("correct", correct, "phaseTwo", svc.isPhaseTwo());
     }
-
+    /** Rows currently eligible for a clue reveal */
+    @GetMapping("/clue-eligible-rows")
+    public List<Integer> clueEligibleRows() {
+        return svc.eligibleClueRows();
+    }
     /** One-time Phantom Scan: which letters A–Z appear anywhere in the 6 guesses */
-    @GetMapping("/phantom-scan")
-    public Map<String, Boolean> phantomScan() {
-        return svc.phantomScan();
+
+    /** Phase 2 Phantom Scan: remaining unrevealed letter counts */
+    @GetMapping("/phantom-scan-v2")
+    public Map<String, Object> phantomScanV2() {
+        return Map.of(
+                "phaseTwo", svc.isPhaseTwo(),
+                "counts", svc.phantomRemaining()
+        );
     }
 }
