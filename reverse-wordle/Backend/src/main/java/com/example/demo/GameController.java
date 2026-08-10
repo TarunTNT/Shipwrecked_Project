@@ -67,7 +67,6 @@ public class GameController {
         return Map.of("solution", svc.debugSolution());
     }
     /** Validate a single letter at (row, col) */
-    @PostMapping("/validate-letter")
     /** Validate a single letter at (row, col) */
     @PostMapping("/validate-letter")
     public Map<String, Object> validateLetter(@RequestBody Map<String, Object> body) {
