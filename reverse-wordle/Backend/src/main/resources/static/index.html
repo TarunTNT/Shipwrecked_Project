@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="phaseOverlay"></div>
   <h1>Reverse Wordle</h1>
   <p id="instructions">
     You see a fully solved Wordle (6 guesses) but only colors remain.<br>
@@ -27,8 +28,15 @@
       </div>
 
       <div id="tools">
-        <h3>Letter Counter</h3>
-        <input id="f1" maxlength="1" placeholder="A"> appears <span id="o1">–</span> times
+        <div id="scannerTool">
+          <h3>Number Scanner</h3>
+          <input id="f1" maxlength="1" placeholder="A"> appears <span id="o1">–</span> times
+        </div>
+
+        <div id="phantomTool" style="display:none;">
+          <h3>Phantom Scan</h3>
+          <div id="phantomGrid"></div>
+        </div>
 
         <h3>One-Time Clue</h3>
         <button id="revealClue">Reveal a Clue</button>
@@ -37,10 +45,6 @@
         <input id="scratchIn" maxlength="5" placeholder="scratch guess">
         <button id="scratchBtn">Go</button>
         <div id="scratchRows"></div>
-
-        <h3>Phantom Scan</h3>
-        <button id="phantomScanBtn">Phantom Scan</button>
-        <div id="phantomGrid"></div>
       </div>
     </div>
   </div>

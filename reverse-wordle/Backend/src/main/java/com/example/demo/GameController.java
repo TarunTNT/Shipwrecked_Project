@@ -63,7 +63,7 @@ public class GameController {
     }
     // ⚠️ DEV/TEST ONLY — remove this endpoint before shipping.
     @GetMapping("/dev/solution")
-    public Map<String, String> devSolution() {
+    public Map<String, List<WordleService.Guess>> devSolution() {
         return Map.of("solution", svc.debugSolution());
     }
     /** Validate a single letter at (row, col) */
@@ -76,6 +76,9 @@ public class GameController {
         boolean correct = svc.validateLetter(row, col, letter.charAt(0));
         return Map.of("correct", correct, "phaseTwo", svc.isPhaseTwo());
     }
+
+
+
     /** Rows currently eligible for a clue reveal */
     @GetMapping("/clue-eligible-rows")
     public List<Integer> clueEligibleRows() {

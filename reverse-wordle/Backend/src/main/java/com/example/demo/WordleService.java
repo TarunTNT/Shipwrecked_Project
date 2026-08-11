@@ -2,6 +2,7 @@
 package com.example.demo;
 
 import org.springframework.stereotype.Service;
+import org.w3c.dom.ls.LSOutput;
 
 import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
@@ -116,9 +117,9 @@ public class WordleService {
 
 
     // ⚠️ DEV/TEST ONLY — remove before shipping to real players.
-    public String debugSolution() {
+    public List<Guess> debugSolution() {
         if (puzzleGuesses == null) newGame();
-        return solution;
+        return puzzleGuesses;
     }
     /** One-time clue reveal of a full row */
     /** One-time clue reveal of a full row. Row must not be the final (solution) row
@@ -140,7 +141,7 @@ public class WordleService {
         return true;
     }
 
-    /** Scratch-box evaluation */
+    /** S   cratch-box evaluation */
     public Guess scratch(String guess) {
         if (!allWords.contains(guess))
             throw new IllegalArgumentException("Not in dictionary");
